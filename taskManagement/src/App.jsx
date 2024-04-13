@@ -19,7 +19,7 @@ function App() {
             <Route path="/signout" element={<Signout/>}/>
             <Route path="/home" element={<Home/>}/>
             <Route path="/tasks" element={<Task/>}/>
-            <Route path="/userTasks/:id" element={<UserTasks/>}/>
+            <Private path='/userTasks/:id' element={<UserTasks />} />
             <Route element={<Private/>}>
                <Route path="/assignTasks" element={<AssignTask/>} />
             </Route>

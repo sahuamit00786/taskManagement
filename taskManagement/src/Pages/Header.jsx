@@ -33,7 +33,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
             <div className="flex items-center">
                 <Link to="/">
-                    <img src='https://tse2.mm.bing.net/th?id=OIP.2Vcy125VZa6W1f4FSYYumAHaF7&pid=Api&P=0&h=180' alt="logo" className="w-35 m-2 h-20" />
+                    <img src='http://oikoshreemgroup.com/wp-content/uploads/2023/01/logo-10-1.png' alt="logo" className="w-35 m-3 h-20" />
                 </Link>
             </div>
             <div className="flex text-blue-500a mt-[-10px] font-semibold text-md gap-12 pr-[40px] md:pr-[200px] items-center">

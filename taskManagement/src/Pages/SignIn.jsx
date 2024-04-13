@@ -12,6 +12,8 @@ const SignIn = () => {
   const{currentUser} = useSelector((state)=>state.user)
   console.log(currentUser)
 
+  const[error,setError] = useState(null)
+
   const handleChange = (e) => {
     setformData({...formData, [e.target.id]: e.target.value})
   }
@@ -33,8 +35,11 @@ const SignIn = () => {
       if(res.ok)
       {
         navigate('/')
+      }else{
+        setError(data.message)
       }
     } catch (error) {
+      setError(error.message)
         console.log(error)
     }
   }
@@ -56,8 +61,11 @@ const SignIn = () => {
         </form>
 
         <div className="flex items-center justify-between">
-            <button onClick={handleSubmit} className="bg-blue-500 hover:bg-bluse-700 text-white px-4 py-2 rounded-[10px]">Sign in</button>
-            <span className="text-blue-500 hover:text-blue-700"><Link to='/signout'>dont have account</Link> </span>
+            <button onClick={handleSubmit} className="bg-[#C28A50] hover:bg-bluse-700 text-white px-4 py-2 rounded-[10px]">Sign in</button>
+            <span className="text-[#C28A50] hover:text-blue-700"><Link to='/signout'>dont have account</Link> </span>
+        </div>
+        <div className="flex justify-center mt-3">
+          <span className="text-red-500 mx-auto">{error}</span>
         </div>
         </div>
       </div>

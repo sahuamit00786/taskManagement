@@ -2,10 +2,12 @@ import { useEffect,useState } from "react"
 import { MdDelete } from "react-icons/md";
 import { MdAdd } from "react-icons/md";
 import { Link } from "react-router-dom";
+import loader from '/loader.svg'
 
 const AssignTask = () => {
 
     const[user,setUser] = useState([])
+    const[loading,setLoading] = useState(true)
     console.log(user)
 
     useEffect(()=>{
@@ -20,6 +22,7 @@ const AssignTask = () => {
             const data = await res.json();
             console.log(data)
             setUser(data)
+            setLoading(false)
 
             } catch (error) {
                 console.log(error)        
@@ -27,7 +30,7 @@ const AssignTask = () => {
         }
      getAllUsers();   
 
-    },[])
+    },[window.location.reload])
 
     const handleDeleteUser = async(id) =>{
         console.log(id)
@@ -40,6 +43,7 @@ const AssignTask = () => {
                 })
                 const data = await res.json();
                 console.log(data)
+                window.location.reload()
                 
             } catch (error) {
                 console.log(error)
@@ -49,35 +53,39 @@ const AssignTask = () => {
   return (
     <div className="flex flex-col mt-10 justify-center mx-auto w-full">
                 <>
-                    <div className="w-full mx-auto mt-3">
-                        <table className="w-full mx-auto">
-                            <thead className="mb-4">
-                                <tr>
-                                    <th className="w-1/3">Username</th>
-                                    <th className="w-1/3">Email</th>
-                                    <th className="w-1/3"></th>
-                                </tr>
-                            </thead>
-                            <tbody className="mx-auto">
-                                {
-                                    user.map((user)=>( 
-                                        <>
-                                            <tr key={user._id}>
-                                            <td className="w-1/3 font-semibold text-center">{user.username}</td>
-                                            <td  className="w-1/3 text-blue-400 cursor-pointer hover:text-blue-700 font-semibold text-center"><Link to={`/userTasks/${user._id}`}>{user._id}</Link></td>
-                                            <td className="w-1/3 font-semibold text-center">
-                                                <div className="flex flex-row gap-2">
-                                                    <button className="rounded border px-2 py-1"><MdDelete/></button>
-                                                    <button className="rounded border px-2 py-1"><MdAdd/></button>
-                                                </div>
-                                            </td>
-                                            </tr>
-                                        </>
-                                    ))
-                                }
-                            </tbody>
-                        </table>
+                    {
+                        loading ? (
+                            <div className="mx-auto mt-[150px]">
+                                <img width='100px' src={loader} alt="" />
+                            </div>
+                        ):(
+                            <div className="w-3/4 mx-auto">
+                        <div className="w-full flex flex-row">
+                            <div className="w-1/3 text-center font-semibold text-lg">Name</div>
+                            <div className="w-1/3 text-center font-semibold text-lg">Email</div>
+                            <div className="w-1/3 text-center">Actions</div>
+                        </div>
+                        <div className="mt-4">
+                            {
+                            user.map((user)=>(
+    
+                            <div key={user._id} className="w-full flex flex-row">
+                                <div className="w-1/3 text-lg  text-center">{user.username}</div>
+                                <div className="w-1/3 text-lg text-blue-600 font-semibold hover:text-blue-700 cursor-pointer text-center"><Link to={`/userTasks/${user._id}`}>{user.email}</Link></div>
+                                <div className="w-1/3 text-center">
+                                    <button onClick={()=>handleDeleteUser(user._id)} className="rounded border text-[#C28A50] px-2 py-1"><MdDelete/></button>
+                                    <button className="rounded border px-2 py-1">
+                                        <Link to={`/userTasks/${user._id}`}><MdAdd/></Link>
+                                    </button>
+                                </div>
+                            </div>
+                            ))
+                        }
+                        </div>
                     </div>
+                        )
+                    }
+                    
                 </>
     </div>
   )

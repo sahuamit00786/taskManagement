@@ -53,8 +53,8 @@ const Signout = () => {
         </form>
 
         <div className="flex items-center justify-between">
-            <button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-[10px]">Sign up</button>
-            <span className="text-blue-500 hover:text-blue-700"><Link to='/signin'>Already have account</Link> </span>
+            <button onClick={handleSubmit} className="bg-[#C28A50] hover:bg-blue-700 text-white px-4 py-2 rounded-[10px]">Sign up</button>
+            <span className="text-[#C28A50] hover:text-blue-700"><Link to='/signin'>Already have account</Link> </span>
         </div>
         </div>
       </div>
