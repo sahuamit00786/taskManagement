@@ -4,8 +4,9 @@ import { Task } from "../models/Task.model.js";
 function adminController()
 {
     return{
-        async getUsers(req,res)
+        async getUsers(req,res,next)
         {
+            
             try {
                 const users = await User.find({isAdmin:false});
                 res.status(200).json(users)
@@ -14,7 +15,7 @@ function adminController()
             }
         },
 
-        async getUserTask(req,res)
+        async getUserTask(req,res,next)
         {
             console.log(req.params.id)
             try {
@@ -25,7 +26,7 @@ function adminController()
             }
         },
 
-        async completeTask(req,res)
+        async completeTask(req,res,next)
         {
             const id = req.params.id;
             try {
@@ -36,7 +37,7 @@ function adminController()
             }
         },
 
-        async deleteUser(req,res)
+        async deleteUser(req,res,next)
         {
             const id = req.params.id;
             console.log(id)

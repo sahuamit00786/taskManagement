@@ -5,8 +5,8 @@ function taskController()
     return{
         async newTask(req,res)
         {
-            const{title,content,createdFor} = req.body;
-            if(!title || !content)
+            const{title,content,createdFor,deadline} = req.body;
+            if(!title || !content || !deadline)
             {
                 res.status(404).json({message:'All fields are required'})
             }
@@ -14,7 +14,8 @@ function taskController()
             const newTask = new Task({
                 title,
                 content,
-                createdFor
+                createdFor,
+                deadline
             })
 
             try {
@@ -54,10 +55,10 @@ function taskController()
         async editTask(req,res)
         {
             const id = req.params.id;
-            const{title,content} = req.body;
+            const{title,content,deadline} = req.body;
             
             try {
-                const validUser = await Task.findByIdAndUpdate({_id:id},{title,content},{new:true})
+                const validUser = await Task.findByIdAndUpdate({_id:id},{title,content,deadline},{new:true})
                 
                 if(!validUser) {
                     res.status(400).json({message:'couldn`t find task with id'})

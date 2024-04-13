@@ -14,6 +14,7 @@ function authController()
                     message: "Please fill all the fields"
                 })
             }
+
             const hashedPassword = bcryptjs.hashSync(password,10)
             const newUser = new User({
                 username,
@@ -33,29 +34,37 @@ function authController()
         {
             const{username,password} = req.body;
             console.log(req.body)
+            console.log('request',req.user)
             if(!username || !password)
             {
-                res.status(400).json({
+                return res.status(400).json({
                     message: "Please fill all the fields"
                 })
             }
             
             try {
 
-                const validUser = await User.findOne({username})
-                const validPassword = bcryptjs.compareSync(password,validUser.password)
-                if(!validPassword){
-                    res.json({message: "Invalid password"})
+               const user = await User.findOne({ username });
+
+               if (!user) {
+                 return res.status(401).json({ message: "Invalid username or password" });
                 }
 
-                const token = jwt.sign({id:validUser._id},process.env.JWT_SECRET)
-                console.log(validUser)
-                res.status(200).cookie('access_token',token,{
-                    httpOnly:true,
-                }).json(validUser)
+                const isValidPassword = bcryptjs.compareSync(password, user.password);
+
+                if (!isValidPassword) {
+                    return res.status(401).json({ message: "Invalid username or password" });
+                }
+
+                const token = jwt.sign({ id: user._id, isAdmin:user.isAdmin }, process.env.JWT_SECRET);
+
+                res.cookie('access_token', token, {
+                 httpOnly: true,
+                 // Other cookie options
+                }).status(200).json(user);
 
             } catch (error) {
-                // console.log(error)
+                return res.json(400).json({message: 'invalid'})
             }
 
         },
