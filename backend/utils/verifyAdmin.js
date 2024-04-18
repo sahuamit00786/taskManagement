@@ -1,20 +1,21 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 
-export const verifyAdmin = (req,res,next) => {
+export const verifyAdmin = (req, res, next) => {
     const token = req.cookies.access_token;
-    if(!token)
-    {
-        return res.status(401,'Invalid token')
+    // console.log('Token:', token);
+    if (!token) {
+        return res.status(401).send('Invalid token');
     }
-    jwt.verify(token,process.env.JWT_SECRET,(err,user)=>{
-        if(err)
-        {
-            return res.status(401,'unauthorized')
+    jwt.verify(token, 'jwt-secrets', (err, user) => {
+        if (err) {
+            // console.error('JWT Verification Error:', err);
+            return res.status(401).send('Unauthorized');
         }
-        if(!user.isAdmin)
-        {
-            return res.status(401,'unauthorized')
+        // console.log('Decoded User:', user);
+        if (!user.isAdmin) {
+            return res.status(401).send('Unauthorized');
         }
-        next()
-    })
-}
+        req.user = user;
+        next();
+    });
+};

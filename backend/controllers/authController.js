@@ -34,7 +34,6 @@ function authController()
         {
             const{username,password} = req.body;
             console.log(req.body)
-            console.log('request',req.user)
             if(!username || !password)
             {
                 return res.status(400).json({
@@ -55,9 +54,9 @@ function authController()
                 if (!isValidPassword) {
                     return res.status(401).json({ message: "Invalid username or password" });
                 }
-
+                console.log(user.isAdmin)
                 const token = jwt.sign({ id: user._id, isAdmin:user.isAdmin }, process.env.JWT_SECRET);
-
+                console.log(token)
                 res.cookie('access_token', token, {
                  httpOnly: true,
                  // Other cookie options
@@ -69,7 +68,7 @@ function authController()
 
         },
 
-        async signout(req,res)
+        async signout(req,res,next)
         {
             res.clearCookie('access_token');
             res.status(200).json({message:"signing out"})

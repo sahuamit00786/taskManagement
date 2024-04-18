@@ -1,25 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AiOutlineDelete } from "react-icons/ai";
-import { MdOutlineDoneOutline } from "react-icons/md";
+import { MdAutorenew } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
 
 const UserTasks = () => {
 
-    const {id} = useParams()
+    const {id,username} = useParams()
 
     const[editedData,seteditedData] = useState({});
     const[formData,setFormData] = useState({});
     const[tasks,setTasks] = useState([]);
     const[taskKey,settaskKey] = useState(null);
-    // console.log(taskKey)
-    console.log(editedData)
-
-
-    // console.log(formData)
-
-    const currentTime = new Date().getTime();
-    console.log("currentTime",currentTime)
+    console.log(tasks)
+    console.log(tasks)
     
     useEffect(()=>{
         const getUserData = async()=>{
@@ -39,13 +33,19 @@ const UserTasks = () => {
                 console.log(error)
             }
         }
+
         getUserData()
         
-    },[window.location.reload])
+    },[])
 
-    const handleChange = (e)=>{
-        setFormData({...formData,[e.target.id]:e.target.value});
+  const handleChange = (e) => {
+    if (e.target.type === 'checkbox') {
+        setFormData({...formData, priority: e.target.checked});
+    } else {
+        setFormData({...formData, [e.target.id]: e.target.value});
     }
+};
+
 
     const handleSubmit = async(e)=>{
         e.preventDefault()
@@ -53,6 +53,8 @@ const UserTasks = () => {
             ...formData,
             createdFor: id
         }
+
+        console.log(completeData)
 
         try {
             const res = await fetch('/api/newTask',{
@@ -64,11 +66,16 @@ const UserTasks = () => {
             })
 
             const data = await res.json();
+            console.log(data)
             if(res.ok)
             {
-                setTasks({...tasks, data});
-                window.location.reload()
+                // setTasks(tasks.filter(task => task._id !== null));
+                setTasks([...tasks, data]);
+                console.log(formData)
+                setFormData({})
+                // window.location.reload()
             }
+
             // console.log(data);
 
         } catch (error) {
@@ -80,10 +87,33 @@ const UserTasks = () => {
         seteditedData({...editedData,[e.target.id]:e.target.value});
     }
 
+    const handleReAssign = async(id)=>{
+
+        try {
+            const res = await fetch(`/api/reAssignTask/${id}`,{
+                method:'PUT',
+                headers:{
+                    'Content-Type':'application/json',
+                },
+                body:JSON.stringify({completed: false})
+            })
+            const data = await res.json();
+            if(res.ok)
+            {
+                // console.log(data)
+                setTasks(prevTasks => prevTasks.map(task=> task._id === id ? data : task));    
+                // window.location.reload()
+            }
+            
+        } catch (error) {
+            console.log(error)
+        }
+
+    }
+
      const handleEdit = async(id)=>{
         // e.preventDefault()
         settaskKey(id)
-        console.log('id',id)
         try {
             const res = await fetch(`/api/editTask/${id}`,{
                 method:'PUT',
@@ -96,8 +126,11 @@ const UserTasks = () => {
             const data = await res.json();
             console.log(data)
             // console.log(data);
-            window.location.reload()
-            settaskKey(null)
+            if(res.ok)
+            {
+                setTasks(prevTasks => prevTasks.map(task => task._id === id ? data : task));    
+                settaskKey(null)
+            }
 
         } catch (error) {
             console.log(error)
@@ -112,6 +145,7 @@ const UserTasks = () => {
             headers:{
                 'Content-Type':'application/json'
             },
+            
         })
         const data = await res.json()
         console.log(data)
@@ -125,17 +159,27 @@ const UserTasks = () => {
             console.log(error.message)
         }
     }
+
+    const convertToIST = (utcTimeString) => {
+        const ISTOffset = 330; // IST is UTC+5:30
+        const utcTime = new Date(utcTimeString);
+        const ISTTime = new Date(utcTime.getTime() + (ISTOffset * 60000)); // Add offset in milliseconds
+        return ISTTime;
+    };
   
     return (
-        <div>
-            <div className="w-5/6 mt-[60px] h-[200px] mb-[100px] flex flex-col md:flex-row flex-wrap mx-auto gap-6">
+        <div className='pt-8'>
+            <h1 className='text-xl underline font-semibold text-center'>{username}'s tasks</h1>
+            <div className="w-5/6 mt-[60px] mb-[50px]  grid grid-cols-1 lg:grid-cols-3 lg:gap-9 md:grid-cols-2 mx-auto gap-6">
                 {/* Task mapping */}
                 {tasks.map((task) => (
-                    <div className="w-[270px] shadow-sm rounded-[8px] h-[280px] border relative" key={task._id}>
+                    <div className="w-[320px] mx-auto bg-[#101827] shadow-lg border-gray-300 rounded-[8px] h-[280px] border" key={task._id}>
                         {
-                            taskKey === task._id ? (
-                                <div className="w-[270px] h-full flex justify-center items-center rounded-[8px] shadow-sm border-[2px]">
 
+                            // when we want to edit the task
+
+                            taskKey === task._id ? (
+                                <div className="w-ful h-full flex rounded-[8px] shadow-sm border-[2px]">
                                     <div className="flex flex-col justify-center p-4">
                                         <form action="">
                                             <input
@@ -144,17 +188,26 @@ const UserTasks = () => {
                                                 id="title"
                                                 onChange={handleEditChange}
                                                 placeholder="Enter task title"
-                                                className="border w-[240px] rounded p-2 mb-2"
+                                                className="border w-full text-gray-200 bg-[#101827] w-[240px] rounded p-2 mb-2"
                                             />
                                             <textarea
                                                 defaultValue={task.content}
                                                 id="content"
                                                 placeholder="Enter task description"
                                                 onChange={handleEditChange}
-                                                className="border w-[240px] rounded p-2 mb-2"
+                                                className="border w-full text-gray-200 bg-[#101827] w-[240px] rounded p-2 mb-2"
                                             ></textarea>
+                                            {task.deadline && (
+                                            <input
+                                                defaultValue={new Date(task.deadline).toISOString().substring(0, 16)}
+                                                type="datetime-local"
+                                                id="deadline"
+                                                onChange={handleEditChange}
+                                                className="px-8 text-gray-200 bg-[#101827] text-center py-2"
+                                            />
+                                    )}
                                         </form>
-                                        <input type="datetime-local" id='deadline' onChange={handleEditChange} className='px-8 py-2' />
+
                                         <button
                                             onClick={() => handleEdit(task._id)}
                                             className="bg-blue-500 hover:bg-blue-700 mt-1 rounded-[9px] text-white px-4 py-2 rounded"
@@ -164,16 +217,27 @@ const UserTasks = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className=" flex flex-col justify-center p-4">
-                                    <div className='relative'>
-                                        <div className='h-[180px]'>
-                                            <h1 className="text-center text-lg font-bold pt-3">{task.title.charAt(0).toUpperCase() + task.title.slice(1)}</h1>
-                                            <p className="pt-3">{task.content.charAt(0).toUpperCase() + task.content.slice(1)}</p>
-                                        </div>
+                            
+                                // our tasks
 
+                                <div className=" flex flex-col p-4">
+                                    <div>
+                                        <div className='h-[180px]'>
+                                            <h1 className="text-center italic text-[#CEAD76] text-lg font-bold pt-2 pb-2">{task.title}
+                                                {
+                                                    task.priority && (
+                                                        <span className='text-red-600 pl-2 text-sm'>(prioritize)</span>
+                                                    )
+                                                }
+                                            </h1>
+                                            <hr/>
+                                            <p className="pt-3 overflow-hidden h-[125px] overflow-y-scroll text-gray-200">{task.content}</p>
+                                        </div>
                                         <hr className='w-full' />
 
-                                        <div className='text-center mx-auto pt-2 w-full'>
+                                     {
+                                        task.completed === false ? (
+                                            <div className='text-center text-gray-200 mx-auto pt-2 w-full'>
                                             Deadline :
                                             <span className='pl-2'>
                                                 {new Date(task.deadline).toLocaleDateString()}
@@ -182,14 +246,24 @@ const UserTasks = () => {
                                                 {new Date(task.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         </div>
+                                        ):(
+                                            <h1 className='text-center text-sm text-gray-200 pt-2'> Completed at : 
+                                                {
+                                                    new Date(task.completeTime).toLocaleDateString()+' '+convertToIST(task.completeTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                }
+                                            </h1>
+                                        )
+                                    }
+
+                                        
                                     </div>
-                                    <div className="absolute w-4/5 bottom-2">
+                                    <div className=" mx-auto pt-[4px] w-4/5 bottom-2">
                                         <div className="flex flex-row justify-around items-center">
                                             <button
-                                                onClick={() => handleDelete(task._id)}
+                                                onClick={() => handleReAssign(task._id)}
                                                 className="bg-blue-500 hover:bg-blue-700 mt-1 text-sm rounded-[9px] text-white px-4 py-2 rounded"
                                             >
-                                                <MdOutlineDoneOutline />
+                                                <MdAutorenew />
                                             </button>
                                             <button type='button'
                                                 onClick={()=>settaskKey(task._id)}
@@ -210,7 +284,13 @@ const UserTasks = () => {
                     </div>
                 ))}
                 {/* Create new task form */}
-                <div className="w-[270px] flex justify-center items-center rounded-[8px] shadow-sm border-[2px]">
+               
+                
+            </div>
+            <hr className=''/>
+            <div className='mx-auto '>
+                 <h1 className='text-center font-bold text-lg italic pb-4 underline'>Create a new task</h1>
+                <div className="w-[320px] mx-auto text-gray-200 bg-[#101827] h-[280px] rounded-[8px] shadow-sm border-[2px]">
                     <div className=" flex flex-col justify-center p-4">
                         <form onSubmit={handleSubmit} action="">
                             <input
@@ -218,11 +298,15 @@ const UserTasks = () => {
                                 id="title"
                                 onChange={handleChange}
                                 placeholder="Enter task title"
-                                className="border w-[240px] rounded p-2 mb-2"
+                                className="border text-gray-200 bg-[#101827] hover:cursor-pointer w-full rounded p-2 mb-2"
                             />
-                            <textarea id="content" placeholder="Enter task description" onChange={handleChange} className="border rounded w-[240px] p-2 mb-2"></textarea>
-                            <div className='flex justify-center'>
-                                <input id='deadline' onChange={handleChange} className='text-gray-600' type="datetime-local" />
+                            <textarea id="content" placeholder="Enter task description" onChange={handleChange} className="border text-gray-200 bg-[#101827] rounded w-full p-2 mb-2"></textarea>
+                            <div className='flex flex-col justify-center'>
+                                <div className='flex mx-auto pb-2 flex-row gap-2'>
+                                    <input onClick={handleChange} type="checkbox"/>
+                                    <span className='text-gray-400'>prioritize</span>
+                                </div>
+                                <input id='deadline' onChange={handleChange} className='bg-gray-800 rounded-[5px] text-center bg-[#101827]' type="datetime-local" />
                             </div>
                         </form>
                         <button
@@ -233,7 +317,8 @@ const UserTasks = () => {
                         </button>
                     </div>
                 </div>
-            </div>
+               </div>
+            
         </div>
     )
 }

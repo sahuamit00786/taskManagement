@@ -4,7 +4,6 @@ const taskSchema = new mongoose.Schema({
     title:{
         type:String,
         required:true,
-        unique:true
     },
     content:{
         type:String,
@@ -19,6 +18,13 @@ const taskSchema = new mongoose.Schema({
     },
     deadline:{
         type:Date,
+    },
+    completeTime:{
+        type:Date,
+    },
+    priority:{
+        type:Boolean,
+        default:false
     }
 },{timestamps:true})
 

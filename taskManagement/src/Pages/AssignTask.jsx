@@ -20,7 +20,7 @@ const AssignTask = () => {
                 }
             })
             const data = await res.json();
-            console.log(data)
+            // console.log(data)
             setUser(data)
             setLoading(false)
 
@@ -33,7 +33,7 @@ const AssignTask = () => {
     },[window.location.reload])
 
     const handleDeleteUser = async(id) =>{
-        console.log(id)
+        // console.log(id)
             try {
                 const res = await fetch(`/api/deleteUser/${id}`,{
                     method:'DELETE',
@@ -42,7 +42,7 @@ const AssignTask = () => {
                     }
                 })
                 const data = await res.json();
-                console.log(data)
+                // console.log(data)
                 window.location.reload()
                 
             } catch (error) {
@@ -51,12 +51,13 @@ const AssignTask = () => {
     }
 
   return (
-    <div className="flex flex-col mt-10 justify-center mx-auto w-full">
+    <div className="bg-gray-100 pt-[60px] min-h-screen">
+        <div className="flex flex-col justify-center mx-auto w-full">
                 <>
                     {
                         loading ? (
                             <div className="mx-auto mt-[150px]">
-                                <img width='100px' src={loader} alt="" />
+                                <img className="rounded-full" width='100px' src={loader} alt="" />
                             </div>
                         ):(
                             <div className="w-3/4 mx-auto">
@@ -69,13 +70,13 @@ const AssignTask = () => {
                             {
                             user.map((user)=>(
     
-                            <div key={user._id} className="w-full flex flex-row">
-                                <div className="w-1/3 text-lg  text-center">{user.username}</div>
-                                <div className="w-1/3 text-lg text-blue-600 font-semibold hover:text-blue-700 cursor-pointer text-center"><Link to={`/userTasks/${user._id}`}>{user.email}</Link></div>
+                            <div key={user._id} className="w-full flex flex-row gap-9">
+                                <div className="w-1/3 text-lg pl-5 font-semibold text-center">{user.username.charAt(0).toUpperCase() + user.username.slice(1)}</div>
+                                <div className="w-1/3 text-lg text-blue-600 font-semibold hover:text-blue-700 cursor-pointer text-center"><Link to={`/userTasks/${user._id}/${user.username}`}>{user.email}</Link></div>
                                 <div className="w-1/3 text-center">
                                     <button onClick={()=>handleDeleteUser(user._id)} className="rounded border text-[#C28A50] px-2 py-1"><MdDelete/></button>
                                     <button className="rounded border px-2 py-1">
-                                        <Link to={`/userTasks/${user._id}`}><MdAdd/></Link>
+                                        <Link to={`/userTasks/${user._id}/${user.username}`}><MdAdd/></Link>
                                     </button>
                                 </div>
                             </div>
@@ -87,6 +88,7 @@ const AssignTask = () => {
                     }
                     
                 </>
+    </div>
     </div>
   )
 }

@@ -5,7 +5,7 @@ function taskController()
     return{
         async newTask(req,res)
         {
-            const{title,content,createdFor,deadline} = req.body;
+            const{title,content,createdFor,deadline,priority} = req.body;
             if(!title || !content || !deadline)
             {
                 res.status(404).json({message:'All fields are required'})
@@ -15,28 +15,38 @@ function taskController()
                 title,
                 content,
                 createdFor,
-                deadline
+                deadline,
+                priority
             })
 
             try {
                 await newTask.save()
-                res.status(200).json({message:'Task saved successfully'})
+                res.status(200).json(newTask)
             } catch (error) {
                 console.log(error)
             }
 
         },
-
-        async getTask(req,res)
+        edit(req,res,next)
         {
-            const id = req.params.id
-            try {
-                const tasks = await Task.find({createdFor: id})
-                res.status(200).json(tasks)
-            } catch (error) {
-                console.log(error.message)
-            }
+            console.log(req.user);
+            res.send({message: 'Task saved successfully'})
         },
+
+        async getTask(req, res) {
+            const id = req.params.id;
+            try {
+               const priorityTasks = await Task.find({ createdFor: id,completed:"false", priority:"true" });
+               const priorityFalse = await Task.find({ createdFor: id,completed:"false", priority:"false"}).sort({deadline:1});
+               const tasks = priorityTasks.concat(priorityFalse)
+               const completedTasks = await Task.find({ createdFor: id, completed: "true" });
+               const task = tasks.concat(completedTasks)
+               res.status(200).json(task);
+             } catch (error) {
+                console.log(error.message);
+                res.status(500).json({ error: 'Internal Server Error' });
+              }
+            },
 
         async deleteTask(req,res)
         {
@@ -64,7 +74,7 @@ function taskController()
                     res.status(400).json({message:'couldn`t find task with id'})
                 }
                 else{
-                    res.status(200).json({message:'Task edited successfully'})
+                    res.status(200).json(validUser)
                 }
 
             } catch (error) {

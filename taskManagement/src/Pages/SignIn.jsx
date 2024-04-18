@@ -10,7 +10,7 @@ const SignIn = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const{currentUser} = useSelector((state)=>state.user)
-  console.log(currentUser)
+  // console.log(currentUser)
 
   const[error,setError] = useState(null)
 
@@ -29,9 +29,9 @@ const SignIn = () => {
         body:JSON.stringify(formData)
       })
       const data = await res.json()
-      console.log(data)
+      // console.log(data)
       dispatch(setCurrentUser(data))
-      console.log(data)
+      // console.log(data)
       if(res.ok)
       {
         navigate('/')
@@ -47,7 +47,7 @@ const SignIn = () => {
   return (
     <>
     <div className="flex mt-[-70px] min-h-screen justify-center items-center">
-       <div className=" mx-auto w-[400px] mt-[10px] border shadow-lg p-8">
+       <div className=" mx-auto w-[350px] sm:w-[400px] mt-[10px] border shadow-lg p-8">
         <h1 className="font-bold text-center text-xl mb-4">Sign in</h1>
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col py-2">

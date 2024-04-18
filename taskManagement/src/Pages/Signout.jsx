@@ -4,7 +4,7 @@ const Signout = () => {
 
     const[formData,setformData] = useState({});
     const navigate = useNavigate();
-    console.log(formData)
+    // console.log(formData)
 
     const handleSubmit = async(e)=>{
     e.preventDefault()
@@ -17,7 +17,7 @@ const Signout = () => {
         body:JSON.stringify(formData)
       })
       const data = await res.json()
-      console.log(data)
+      // console.log(data)
       if(res.ok)
       {
         navigate('/')
@@ -35,7 +35,7 @@ const Signout = () => {
     
     <>
         <div className="flex min-h-screen mt-[-70px] justify-center items-center">
-       <div className=" mx-auto w-[400px] mt-[10px] border shadow-lg p-8">
+       <div className=" mx-auto w-[350px] sm:w-[400px] mt-[10px] border shadow-lg p-8">
         <h1 className="font-bold text-xl mb-4 text-center">Sign up</h1>
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col py-2">

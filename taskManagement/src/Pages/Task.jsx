@@ -2,9 +2,13 @@ import { useEffect, useState } from "react"
 import {useSelector} from 'react-redux'
 import {Link} from 'react-router-dom'
 import { MdOutlineDoneOutline } from "react-icons/md";
+import { FaRedhat } from "react-icons/fa";
+import loader from '/loader.svg'
+
 const Task = () => {
 
     const[myTasks,setTasks] = useState([]);
+    const[loading,setLoading] = useState(false);
     const{currentUser} = useSelector((state)=>state.user)
     console.log(myTasks)
 
@@ -20,31 +24,43 @@ const Task = () => {
                 })
 
                 const data = await res.json()
-                setTasks(data)
+                if(res.ok)
+                {
+                    setTasks(data)
+                    setLoading(false)
+                }
                 
             } catch (error) {
                 console.log(error.message)
             }
         }
         tasks();
-    },[window.location.search])
+    },[])
 
+    const convertToIST = (utcTimeString) => {
+        const ISTOffset = 330; // IST is UTC+5:30
+        const utcTime = new Date(utcTimeString);
+        const ISTTime = new Date(utcTime.getTime() + (ISTOffset * 60000)); // Add offset in milliseconds
+        return ISTTime;
+    };
 
     const handleComplete = async(id)=>{
         try {
+            const completeTime = new Date().toISOString().slice(0, 19).replace('T', ' '); // Format: YYYY-MM-DD HH:mm:ss
+            // console.log(completeTime)
             const res = await fetch(`/api/completeTask/${id}`,{
                 method:'PUT',
                 headers:{
                     'Content-Type':'application/json',
                 },
-                body:JSON.stringify({completed: true})
+                body:JSON.stringify({completed: true, completeTime: completeTime})
             })
 
             const data = await res.json();
-            console.log(data);
+            // console.log(data);
             if(res.ok)
             {
-                window.location.reload()
+                setTasks(prevTasks=>prevTasks.map(task=>task._id === id ? data : task))
             }
 
         } catch (error) {
@@ -54,45 +70,73 @@ const Task = () => {
 
   return (
 
-    <div>
+    <div className="bg-gray-100 flex flex-col min-h-screen pt-6">
+        <h1 className="text-center font-bold text-xl py-5 font-semibold underline">Assigned Tasks</h1>
         {   
         currentUser ? (
-                <div className="w-4/5 mx-auto flex flex-row gap-8 mt-8">
+                <div className="flex justify-center items-center">
+                    <div className="w-4/5 flex sm:flex-row flex-wrap flex-col gap-4 items-center sm:gap-8 mt-8">
                     {myTasks.length === 0 ? (
-                        <div>
-                            <h1 className="text-center font-bold pt-3">No tasks yet</h1>
+                        <div className="mx-auto mt-[150px]">
+                            <h1>No tasks yet</h1>
                         </div>
                     ) : (
-                        myTasks.map((task) => (
-                            <div className="w-[270px] shadow-sm rounded-[8px] border" key={task._id}>
-                                <div className="p-4">
-                                    <div className='h-[200px]'>
-                                        <h1 className="text-center font-bold pt-3">{task.title}</h1>
-                                        <p className="pt-3">{task.content}</p>
+                        loading ?(
+                            <div className="mx-auto mt-[150px]">
+                                <img width='100px' src={loader} alt="" />
+                            </div>
+                        ):(
+                            myTasks.map((task) => (
+                            <div className=" sm:w-2/5" key={task._id}>
+                                <div className="bg-[#101827] w-[380px] p-8 rounded-[20px] h-[220px]">
+                                    <div className="flex flex-row items-center justify-between">
+                                        <FaRedhat size={32} color="#CEAD76"/>
+                                        {
+                                            task.priority && (
+                                                <span className="text-red-600 font-bold text-sm italic">
+                                                    (prioritize)
+                                                </span>
+                                            )
+                                        }
+                                        {
+                                             task.completed === false ? (
+                                                <div className="flex gap-2 text-white italic text-[12px]">
+                                                    <span>{new Date(task.deadline).toLocaleDateString()}</span>
+                                                    <span>{new Date(task.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-white font-bold text-sm italic">
+                                                    completed
+                                                </span>
+                                            )
+                                        }
                                     </div>
-                                    <hr/>
-                                   <div className="flex py-3 flex-row z-10 gap-3 justify-center">
-                                     <span>{new Date(task.deadline).toLocaleDateString()}</span>
-                                     <span>{new Date(task.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                   </div>
-                                    <div className=" w-4/5 mx-auto ">
-                                        <div className="flex flex-row justify-around items-center">
-                                            {task.completed === false ? (
-                                                <button onClick={() => handleComplete(task._id)} className="bg-blue-400 hover:bg-blue-500 mt-1 text-sm rounded-[9px] text-white px-4 py-2 w-full mx-auto rounded">
+                                    
+                                    <h1 className=" text-white py-2 text-lg italic pt-3">{task.title}</h1>
+                                    <p className="text-gray-300 text-sm overflow-y-scroll overflow-hidden h-[50px]">{task.content}</p>
+                                    <div className="py-3">
+                                            {
+                                             task.completed === false ? (
+                                                <button onClick={() => handleComplete(task._id)} className=" border hover:border-[#CEAD76] w-[200px] mt-1 text-sm rounded-[9px] text-white px-4 py-1 mx-auto rounded">
                                                     <MdOutlineDoneOutline className="text-white-600 mx-auto cursor-pointer" />
                                                 </button>
                                             ) : (
-                                                <button disabled={true} className="bg-blue-400 flex items-center justify-around mt-1 text-sm rounded-[9px] text-white px-4 py-2 w-full mx-auto rounded">
-                                                    <h1>completed</h1>
-                                                    <MdOutlineDoneOutline className="text-red-500 cursor-pointer" />
+                                                <button disabled={true} className="border w-[300px] flex flex-row justify-center gap-2 items-center mt-1 text-[13px] rounded-[9px] text-white px-4 py-1 rounded">
+                                                    <h1 className="text-center">Completed on : </h1>
+                                                    <span>{new Date(task.completeTime).toLocaleDateString()}</span>
+                                                    <span>{
+                                                        convertToIST(task.completeTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                    }</span>
+                                                    <MdOutlineDoneOutline className="text-green-500 cursor-pointer" />
                                                 </button>
                                             )}
                                         </div>
-                                    </div>
                                 </div>
                             </div>
                         ))
+                        )
                     )}
+                </div>
                 </div>
             ) : (
                 <div className=" flex mt-[150px]">
