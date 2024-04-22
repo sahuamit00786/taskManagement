@@ -1,21 +1,27 @@
 import jwt from 'jsonwebtoken';
 
 export const verifyAdmin = (req, res, next) => {
-    const token = req.cookies.access_token;
-    // console.log('Token:', token);
-    if (!token) {
+    const authorizationHeader = req.headers['authorization'];
+    // console.log(authorizationHeader);
+    
+    if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
         return res.status(401).send('Invalid token');
     }
-    jwt.verify(token, 'jwt-secrets', (err, user) => {
+
+    const token = authorizationHeader.split(' ')[1];
+    // console.log(token);
+
+    jwt.verify(token, process.env.JWT_SECRET , (err, user) => {
         if (err) {
-            // console.error('JWT Verification Error:', err);
-            return res.status(401).send('Unauthorized');
+            // console.log('JWT Verification Error:', err);
+            return res.status(401).send('Unauthorized',err);
         }
-        // console.log('Decoded User:', user);
+        
         if (!user.isAdmin) {
             return res.status(401).send('Unauthorized');
         }
         req.user = user;
+        // console.log(req.user);
         next();
     });
 };
